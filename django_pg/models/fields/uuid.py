@@ -2,11 +2,13 @@ from __future__ import absolute_import, unicode_literals
 from django.db.models import Field, SubfieldBase
 from django.db.models.fields import NOT_PROVIDED
 from django_pg.utils.south import south_installed
-from psycopg2.extensions import register_adapter
+from psycopg2.extras import register_uuid
 import importlib
 import six
 import uuid
 
+# Register the UUID type with psycopg2.
+register_uuid()
 
 @six.add_metaclass(SubfieldBase)
 class UUIDField(Field):
@@ -72,17 +74,6 @@ class UUIDField(Field):
         # Convert our value to a UUID.
         return uuid.UUID(value)
 
-    def get_db_prep_value(self, value, connection, prepared=False):
-        """Return a UUID object. Also, ensure that psycopg2 is
-        aware how to address that object.
-        """
-        # Register the UUID type with psycopg2.
-        register_adapter(uuid.UUID, UUIDAdapter)
-
-        # Run the normal functionality.
-        return super(UUIDField, self).get_db_prep_value(value, connection,
-                                                        prepared=prepared)
-
     def pre_save(self, instance, add):
         """If auto is set, generate a UUID at random."""
 
@@ -113,16 +104,6 @@ class UUIDField(Field):
         if isinstance(self._auto_add, bool):
             return self._auto_add
         return '%s:%s' % (self._auto_add.__module__, self._auto_add.__name__)
-
-
-class UUIDAdapter(object):
-    def __init__(self, value):
-        if not isinstance(value, uuid.UUID):
-            raise TypeError('UUIDAdapter only understands UUID objects.')
-        self.value = value
-
-    def getquoted(self):
-        return ("'%s'" % self.value).encode('utf8')
 
 
 # If South is installed, then tell South how to properly

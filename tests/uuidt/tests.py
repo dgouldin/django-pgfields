@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 from django.test import TestCase
 from django.utils.unittest import skipIf
 from django_pg import models
-from django_pg.models.fields.uuid import UUIDAdapter, UUIDField
+from django_pg.models.fields.uuid import UUIDField
 from django.test.utils import override_settings
 from django_pg.utils.south import south_installed
 from tests.uuidt.models import Movie, Game, Book, SomethingElse
@@ -131,17 +131,6 @@ class NullUUIDSuite(TestCase):
         with self.assertRaises(AttributeError):
             class Thing(models.Model):
                 uuid = models.UUIDField(blank=True)
-
-
-class SupportSuite(TestCase):
-    """Test support classes."""
-
-    def test_uuid_adapter(self):
-        """Ensure that the UUIDAdapter object will fail if it receives
-        something other than a `uuid.UUID` object.
-        """
-        with self.assertRaises(TypeError):
-            adapter = UUIDAdapter('01234567-0123-0123-0123-0123456789ab')
 
 
 @override_settings(DJANGOPG_DEFAULT_UUID_PK=True)

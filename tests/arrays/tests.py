@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
+import uuid
 from django.test import TestCase
-from tests.arrays.models import Place
+from tests.arrays.models import Place, UUIDArray
 
 
 class ArrayTests(TestCase):
@@ -84,6 +85,17 @@ class ArrayTests(TestCase):
     def test_empty_array(self):
         place = Place.objects.get(name='Mordor')
         self.assertEqual(place.residents, [])
+
+    def test_uuid_array(self):
+        uuids = [uuid.uuid4() for i in range(10)]
+        u = UUIDArray.objects.create(uuids=uuids)
+        u = UUIDArray.objects.get(pk=u.pk)
+        self.assertEqual(u.uuids, uuids)
+
+    def test_empty_uuid_array(self):
+        u = UUIDArray.objects.create(uuids=[])
+        u = UUIDArray.objects.get(pk=u.pk)
+        self.assertEqual(u.uuids, [])
 
     def test_create_type_sql(self):
         """Establish that, on an array of a standard field type,
